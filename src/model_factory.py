@@ -7,7 +7,6 @@ from sklearn.neural_network import MLPClassifier
 from sklearn import linear_model
 from sklearn.tree import DecisionTreeClassifier
 
-from src.constants import logger
 from src.models import Models
 
 
@@ -87,8 +86,8 @@ class ModelFactory:
             logger.warn("The search space for the {} has not been implemented yet", mdl_type.value[0])
             return None
         elif mdl_type == Models.LOG_REGRESSION:
-            space['solver'] = ['newton-cg', 'lbfgs']
-            space['penalty'] = ['l2', 'none']
+            space['solver'] = ['newton-cg', 'liblinear']
+            space['penalty'] = ['l1', 'l2']
             space['C'] = [1, 10, 20, 50]
             return space
         else:

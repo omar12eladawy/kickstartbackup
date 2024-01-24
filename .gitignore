@@ -1,1 +1,6 @@
 /data
+/results
+.env
+.ipynb_checkpoints
+*__pycache__*
+.idea
