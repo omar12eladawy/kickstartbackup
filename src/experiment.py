@@ -85,8 +85,7 @@ class Experiment(object):
         tuners = [x[1] for x in inspect.getmembers(sklearn.model_selection)]
 
         X_train, X_test, y_train, y_test = _prepare_data()
-
-        if type(experiment_object) in ensembles:
+        if type(experiment_object) in ensembles or type(experiment_object) is sklearn.pipeline.Pipeline:
             logger.info("Model type: %s", type(experiment_object).__name__)
             metrics_dict = {}
 
@@ -98,8 +97,7 @@ class Experiment(object):
             metrics_dict['confusion matrix'] = confusion_matrix(y_test, y_pred)
             metrics_dict['classification report'] = classification_report(y_test, y_pred)
 
-            logger.debug('The model is %s', self.model)
-            logger.info(metrics_dict['classification report'])
+            logger.info('\n {}'.format(metrics_dict['classification report']))
 
             self.model = experiment_object
             return self.model, metrics_dict
@@ -121,7 +119,6 @@ class Experiment(object):
             metrics_dict['classification report'] = classification_report(y_test, y_pred)
 
             metrics_dict['best params'] = experiment_object.best_params_
-            logger.debug('The model is %s', self.model)
             logger.info("Best parameter (CV score=%0.3f):", experiment_object.best_score_)
             logger.info("That following models had the following best parameters %s", experiment_object.best_params_)
 
