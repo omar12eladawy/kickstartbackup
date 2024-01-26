@@ -5,8 +5,8 @@ import time
 from datetime import datetime
 
 import logging
-logger = logging.getLogger(os.environ.get('MODE'))
 
+logger = logging.getLogger(os.environ.get('MODE'))
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -27,7 +27,7 @@ def _prepare_data():
     y = df[TARGET]
     X = df.drop(TARGET, axis=1)
 
-    #TODO find a way to expose this
+    # TODO find a way to expose this
     col_transformer = make_column_transformer(
         (OneHotEncoder(), FEATURES['cat_cols']),
         remainder=StandardScaler())
@@ -77,7 +77,8 @@ class Experiment(object):
         now = datetime.now()
         timestamp = now.strftime("%d%m%y_%H%M")
         logger.info(
-            "\n####### Starting Experiment dated {} #######\n".format(
+            ""
+            "\n\n\t\t\t\t####### Starting Experiment dated {} #######\n\n".format(
                 timestamp
             )
         )

@@ -17,7 +17,7 @@ handlers:
         class: logging.FileHandler
         level: INFO
         formatter: simple
-        filename: ../results/logstest.logs
+        filename: ../results/experiment.log
         mode: a
 
 loggers:

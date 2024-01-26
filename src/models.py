@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Models(Enum):
+class Models(str, Enum):
     """
     Enum class to help with typing and auto-completion in the IDE
     """

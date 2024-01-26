@@ -1,3 +1,4 @@
+import os
 from typing import Tuple
 
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -7,15 +8,19 @@ from sklearn.neural_network import MLPClassifier
 from sklearn import linear_model
 from sklearn.tree import DecisionTreeClassifier
 
+from src.features import FeatureRegistry
 from src.models import Models
+import logging
 
+logger = logging.getLogger(os.environ.get('MODE'))
 
 class ModelFactory:
     """
     Factory class the implements methods for the creation of models and their search spaces. The Factory is by
     design stateless (not attributes that needs to be initialized)
     """
-
+    def __init__(self, rg: FeatureRegistry):
+        self.rg = rg
     def generate_model_and_search_space(self, mdl_type: Models) -> Tuple:
         """
         Method that return the chosen model instance as well as a search space for optimization
@@ -60,9 +65,9 @@ class ModelFactory:
 
     def _get_search_space(self, mdl_type: Models):
         """logger
-        A method to get the hyperparameter serach space
+        A method to get the hyperparameter search space
         :param mdl_type:  mdl_type: the type to model based on the Enum model class
-        :return:  The Hyperparameter serach space
+        :return:  The Hyperparameter search space
         """
         space = dict()
         if mdl_type == Models.GRADIENT_BOOSTING:
