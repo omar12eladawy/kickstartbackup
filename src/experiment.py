@@ -10,12 +10,10 @@ logger = logging.getLogger(os.environ.get('MODE'))
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from src.constants import FEATURES, raw_data_path, data_file, TARGET, RANDOM_SEED
+from src.constants import raw_data_path, data_file, TARGET, RANDOM_SEED
 import sklearn
 from sklearn import metrics
-from sklearn.compose import make_column_transformer
 from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from src.constants import results_path
 

@@ -1,6 +1,4 @@
-import logging
 import os
-import sys
 
 from src.features import Feature, FeatureType
 from src.models import Models
@@ -17,7 +15,7 @@ features = {
     'Hillshade_3pm': Feature(name='Hillshade_3pm', feat_type=FeatureType.NUM),
     'Horizontal_Distance_To_Fire_Points': Feature(name='Horizontal_Distance_To_Fire_Points', feat_type=FeatureType.NUM),
     'Wilderness_Area': Feature(name='Wilderness_Area', feat_type=FeatureType.CAT),
-    'Soil_Type': Feature(name='Soil_TypeCAT', feat_type=FeatureType.CAT),
+    'Soil_Type': Feature(name='Soil_Type', feat_type=FeatureType.CAT),
 
 }
 # Experiment Constants

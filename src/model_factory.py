@@ -11,7 +11,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-from src.constants import FEATURES
 from src.features import FeatureRegistry, FeatureType
 from src.models import Models
 import logging
@@ -36,19 +35,27 @@ class ModelFactory:
         :param feature_options:
         :return: Tuple of model
         """
-        model = self._get_model(mdl_type)
+        model = self._get_model(mdl_type, feature_set_name, feature_options)
         search_space = self._get_search_space(mdl_type)
         return model, search_space
 
-    def _get_model(self, mdl_type: Models):
+    def _get_model(self, mdl_type: Models, feature_set_name, feature_options):
+
         """
         Method to fetch the correct model type
         :param mdl_type: the type to model based on the Enum model class
         :return: an Instance of the model
         """
+
+        def _get_features(feature_set_name: str, feature_type: FeatureType = None):
+            fts = self.rg.get_features(feature_set_name, feature_type)
+            keys_list = [v.name for k, v in fts.items()]
+            return keys_list
+
         if mdl_type == Models.GRADIENT_BOOSTING:
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
             pipe = Pipeline([
                 ('transformer', col_transformer),
@@ -58,16 +65,18 @@ class ModelFactory:
                                                    verbose=True))])
             return pipe
         elif mdl_type == Models.GAUSSIAN_NB:
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
             pipe = Pipeline([
                 ('transformer', col_transformer),
                 ('gnb', GaussianNB())])
             return pipe
         elif mdl_type == Models.MLP_CLASSIFIER:
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
             pipe = Pipeline([
                 ('transformer', col_transformer),
@@ -79,16 +88,18 @@ class ModelFactory:
                                        verbose=True))])
             return pipe
         elif mdl_type == Models.KNN:
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
             pipe = Pipeline([
                 ('transformer', col_transformer),
                 ('knn', KNeighborsClassifier(n_neighbors=5))])
             return pipe
         elif mdl_type == Models.RANDOM_FOREST:
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
 
             pipe = Pipeline([
@@ -97,9 +108,9 @@ class ModelFactory:
 
             return pipe
         elif mdl_type == Models.DECISION_TREE:
-
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
 
             pipe = Pipeline([
@@ -108,8 +119,9 @@ class ModelFactory:
 
             return pipe
         elif mdl_type == Models.LOG_REGRESSION:
+            cat_fts = _get_features(feature_set_name, feature_type=FeatureType.CAT)
             col_transformer = make_column_transformer(
-                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                (OneHotEncoder(handle_unknown='ignore'), cat_fts),
                 remainder=StandardScaler())
 
             pipe = Pipeline([
@@ -154,8 +166,3 @@ class ModelFactory:
             return space
         else:
             raise NotImplementedError
-
-    def _get_features(self, feature_set_name, feature_type: FeatureType = None):
-        fts = self.rg.get_features(feature_set_name, feature_type)
-        keys_list = [v.name for k, v in fts]
-        return keys_list
