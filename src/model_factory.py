@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger(os.environ.get('MODE'))
 
 
-# todo generate keys dynamically
+# todo generate keys for the serach space with __ dynamically
 class ModelFactory:
     """
     Factory class the implements methods for the creation of models and their search spaces. The Factory is by
@@ -157,12 +157,12 @@ class ModelFactory:
             space['rf__n_estimators'] = [50, 100, 150, 200]
             return space
         elif mdl_type == Models.DECISION_TREE:
-            logger.warn("The search space for the {} has not been implemented yet", mdl_type.value[0])
+            logger.warning("The search space for the {} has not been implemented yet", mdl_type.value[0])
             return None
         elif mdl_type == Models.LOG_REGRESSION:
-            space['solver'] = ['newton-cg', 'liblinear']
-            space['penalty'] = ['l1', 'l2']
-            space['C'] = [1, 10, 20, 50]
+            space['lr__solver'] = ['newton-cg', 'liblinear']
+            space['lr__penalty'] = ['l1', 'l2']
+            space['lr__C'] = [1, 10, 20, 50]
             return space
         else:
             raise NotImplementedError
