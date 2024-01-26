@@ -27,17 +27,9 @@ def _prepare_data():
     y = df[TARGET]
     X = df.drop(TARGET, axis=1)
 
-    # TODO find a way to expose this
-    col_transformer = make_column_transformer(
-        (OneHotEncoder(), FEATURES['cat_cols']),
-        remainder=StandardScaler())
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=RANDOM_SEED)
 
-    X_train_transformed = col_transformer.fit_transform(X_train)
-    X_test_transformed = col_transformer.transform(X_test)
-
-    return X_train_transformed, X_test_transformed, y_train, y_test
+    return X_train, X_test, y_train, y_test
 
 
 class Experiment(object):

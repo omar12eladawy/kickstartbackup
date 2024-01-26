@@ -2,16 +2,16 @@ import logging.config
 import os.path
 import yaml
 from sklearn.model_selection import GridSearchCV
-from src.constants import MODELS, script_folder
+from src.constants import MODELS, script_folder, features
 from src.features import FeatureRegistry
 from src.model_factory import ModelFactory
 from src.experiment import Experiment
 
 
-def main(models):
-    logging.debug('The models passed are: {}', models)
+def main():
 
     rg = FeatureRegistry()
+    rg.register_features(features, 'featureset1')
     factory = ModelFactory(rg)
     exp = Experiment()
 
@@ -22,7 +22,7 @@ def main(models):
 
     logger.info('now running experiments for {}'.format(MODELS))
     for model in MODELS:
-        mdl, search_space = factory.generate_model_and_search_space(mdl_type=model)
+        mdl, search_space = factory.generate_model_and_search_space(mdl_type=model, feature_set_name='featureset1')
         with exp:
             search = GridSearchCV(mdl, search_space, n_jobs=2)
             exp.run_experiment(search)

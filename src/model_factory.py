@@ -1,30 +1,39 @@
 import os
 from typing import Tuple
 
+from sklearn.compose import make_column_transformer
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn import linear_model
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-from src.features import FeatureRegistry
+from src.constants import FEATURES
+from src.features import FeatureRegistry, FeatureType
 from src.models import Models
 import logging
 
 logger = logging.getLogger(os.environ.get('MODE'))
 
+
+# todo generate keys dynamically
 class ModelFactory:
     """
     Factory class the implements methods for the creation of models and their search spaces. The Factory is by
     design stateless (not attributes that needs to be initialized)
     """
+
     def __init__(self, rg: FeatureRegistry):
         self.rg = rg
-    def generate_model_and_search_space(self, mdl_type: Models) -> Tuple:
+
+    def generate_model_and_search_space(self, mdl_type: Models, feature_set_name: str, feature_options=None) -> Tuple:
         """
         Method that return the chosen model instance as well as a search space for optimization
         :param mdl_type: Type of model. If not implemented raise error.
+        :param feature_options:
         :return: Tuple of model
         """
         model = self._get_model(mdl_type)
@@ -38,28 +47,76 @@ class ModelFactory:
         :return: an Instance of the model
         """
         if mdl_type == Models.GRADIENT_BOOSTING:
-            return GradientBoostingClassifier(n_estimators=50,
-                                              learning_rate=0.09,
-                                              max_depth=5,
-                                              verbose=True)
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('gbc', GradientBoostingClassifier(n_estimators=50,
+                                                   learning_rate=0.09,
+                                                   max_depth=5,
+                                                   verbose=True))])
+            return pipe
         elif mdl_type == Models.GAUSSIAN_NB:
-            return GaussianNB()
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('gnb', GaussianNB())])
+            return pipe
         elif mdl_type == Models.MLP_CLASSIFIER:
-            return MLPClassifier(solver='adam',
-                                 alpha=1e-5,
-                                 hidden_layer_sizes=(5, 2),
-                                 random_state=1,
-                                 max_iter=1000,
-                                 verbose=True)
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('mlpc', MLPClassifier(solver='adam',
+                                       alpha=1e-5,
+                                       hidden_layer_sizes=(5, 2),
+                                       random_state=1,
+                                       max_iter=1000,
+                                       verbose=True))])
+            return pipe
         elif mdl_type == Models.KNN:
-            return KNeighborsClassifier(n_neighbors=5)
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('knn', KNeighborsClassifier(n_neighbors=5))])
+            return pipe
         elif mdl_type == Models.RANDOM_FOREST:
-            return RandomForestClassifier(n_estimators=100)
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('rf', RandomForestClassifier(n_estimators=100))])
+
+            return pipe
         elif mdl_type == Models.DECISION_TREE:
-            return DecisionTreeClassifier(random_state=42, max_depth=2)
+
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('dt', DecisionTreeClassifier(random_state=42, max_depth=2))])
+
+            return pipe
         elif mdl_type == Models.LOG_REGRESSION:
-            return linear_model.LogisticRegression()
-        # solver = 'liblinear',C=10, penalty='l2', max_iter = 1000
+            col_transformer = make_column_transformer(
+                (OneHotEncoder(handle_unknown='ignore'), FEATURES['cat_cols']),
+                remainder=StandardScaler())
+
+            pipe = Pipeline([
+                ('transformer', col_transformer),
+                ('lr', linear_model.LogisticRegression())])
+
+            return pipe
         else:
             raise NotImplementedError
 
@@ -83,9 +140,9 @@ class ModelFactory:
             logger.warning("The search space for %s has not been implemented yet", mdl_type.value[0])
             return None
         elif mdl_type == Models.RANDOM_FOREST:
-            space['bootstrap'] = [False, True]
-            space['max_features'] = ['log2', 'sqrt']
-            space['n_estimators'] = [50, 100, 150, 200]
+            space['rf__bootstrap'] = [False, True]
+            space['rf__max_features'] = ['log2', 'sqrt']
+            space['rf__n_estimators'] = [50, 100, 150, 200]
             return space
         elif mdl_type == Models.DECISION_TREE:
             logger.warn("The search space for the {} has not been implemented yet", mdl_type.value[0])
@@ -97,3 +154,8 @@ class ModelFactory:
             return space
         else:
             raise NotImplementedError
+
+    def _get_features(self, feature_set_name, feature_type: FeatureType = None):
+        fts = self.rg.get_features(feature_set_name, feature_type)
+        keys_list = [v.name for k, v in fts]
+        return keys_list
