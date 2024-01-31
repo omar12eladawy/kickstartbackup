@@ -19,6 +19,9 @@ from src.constants import results_path
 
 
 def _prepare_data():
+    """
+    Helper function that gets the data and does a basic split.
+    """
     raw_data = os.path.join(raw_data_path, data_file)
     df = pd.read_csv(raw_data, index_col='Id')
 

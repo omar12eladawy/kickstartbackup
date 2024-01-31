@@ -1,6 +1,7 @@
 import os
-from typing import Tuple
+from typing import Tuple, Dict, Optional
 
+from sklearn.pipeline import Pipeline
 from sklearn.compose import make_column_transformer
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
@@ -18,7 +19,7 @@ import logging
 logger = logging.getLogger(os.environ.get('MODE'))
 
 
-# todo generate keys for the serach space with __ dynamically
+# todo generate keys for the serach space with dynamically
 class ModelFactory:
     """
     Factory class the implements methods for the creation of models and their search spaces. The Factory is by
@@ -132,8 +133,8 @@ class ModelFactory:
         else:
             raise NotImplementedError
 
-    def _get_search_space(self, mdl_type: Models):
-        """logger
+    def _get_search_space(self, mdl_type: Models) -> Optional[Dict]:
+        """
         A method to get the hyperparameter search space
         :param mdl_type:  mdl_type: the type to model based on the Enum model class
         :return:  The Hyperparameter search space
@@ -166,3 +167,6 @@ class ModelFactory:
             return space
         else:
             raise NotImplementedError
+
+    def _create_transformer(self) -> Pipeline:
+        pass

@@ -9,6 +9,12 @@ from src.experiment import Experiment
 
 
 def main():
+    """
+    Main function for the running experiments. You have to initialize a FeatureRegistry and pass it to the ModelFactory
+    object as well as an Experiment object.
+
+    Here we also load the logging config.
+    """
     rg = FeatureRegistry()
     factory = ModelFactory(rg)
     exp = Experiment()
